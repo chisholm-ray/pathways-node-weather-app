@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:1.0.1 as tf
+FROM hashicorp/terraform:1.1.5 as tf
 MAINTAINER "Contino APAC <delivery.au@contino.io>"
 
 RUN apk add --update --no-cache \
