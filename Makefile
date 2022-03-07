@@ -4,7 +4,7 @@ COMPOSE_RUN_AWS = docker-compose run --rm --entrypoint aws tf
 
 AWS_ACCOUNT_ID := $(shell aws sts get-caller-identity --output text --query 'Account')
 AWS_REGION := $(shell aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
-IMAGEFULLNAME := $(shell echo $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/ccr-weather-app-repo:1)
+IMAGEFULLNAME := $(shell echo ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/ccr-weather-app-repo:1)
 
 
 .PHONY: run_plan
