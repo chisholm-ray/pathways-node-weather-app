@@ -45,21 +45,21 @@
 #     }
 #   }
 
-  #   networks_priv = toset(flatten([for subnet_name, values in var.subnet_mappings_priv: [{
-  #                             subnet_name = subnet_name
-  #                             cidr = values.cidr
-  #                             az  = values.az
-  #                             }]     
+#   networks_priv = toset(flatten([for subnet_name, values in var.subnet_mappings_priv: [{
+#                             subnet_name = subnet_name
+#                             cidr = values.cidr
+#                             az  = values.az
+#                             }]     
 
-  #                          ]))
+#                          ]))
 
 #}
 
 # data "aws_availability_zones" "this" {  
 # }
 
-module "networks"{
-  source = "./modules/networks"
+module "networks" {
+  source   = "./modules/networks"
   vpc_cidr = "10.0.10.0/24"
   vpc_name = "ccr-dojo-pathways"
 
@@ -68,17 +68,17 @@ module "networks"{
       cidr = "10.0.10.0/26"
       az   = "ap-southeast-2a"
       name = "ccr-dojo-private-a"
-      }
+    }
     "subnet_2" = {
       cidr = "10.0.10.64/26"
       az   = "ap-southeast-2b"
       name = "ccr-dojo-private-b"
-      }
+    }
     "subnet_3" = {
       cidr = "10.0.10.128/26"
       az   = "ap-southeast-2c"
       name = "ccr-dojo-private-c"
-      }
+    }
   }
 
   subnet_mappings_pub = {
@@ -86,17 +86,17 @@ module "networks"{
       cidr = "10.0.10.192/28"
       az   = "ap-southeast-2a"
       name = "ccr-dojo-public-a"
-      }
+    }
     "subnet_2" = {
       cidr = "10.0.10.208/28"
       az   = "ap-southeast-2b"
       name = "ccr-dojo-public-b"
-      }
+    }
     "subnet_3" = {
       cidr = "10.0.10.224/28"
       az   = "ap-southeast-2c"
       name = "ccr-dojo-public-c"
-      }
+    }
   }
 }
 
@@ -121,10 +121,10 @@ module "networks"{
 
 # output "public_subnet_a" {
 #   value = module.networks.aws_subnet.public["ccr-dojo-public-a"].id
-  
+
 # }
 
 # output "public_subnet_b" {
 #   value = module.networks.aws_subnet.public["ccr-dojo-public-b"].id
-  
+
 # }
