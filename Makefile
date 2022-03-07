@@ -34,7 +34,7 @@ init:
 
 .PHONY: plan
 plan:
-	$(COMPOSE_RUN_TERRAFORM) plan -out=tfplan -input=false
+	$(COMPOSE_RUN_TERRAFORM) plan -out=tfplan -input=false -var="image_uri=$(IMAGEFULLNAME)"
 
 .PHONY: apply
 apply:
