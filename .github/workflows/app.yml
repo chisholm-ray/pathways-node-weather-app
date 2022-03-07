@@ -1,0 +1,36 @@
+name: Build and Push to ECR
+on:
+  workflow_dispatch:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+    paths:
+      - 'weather-app.dockerfile'
+      - '/src/**'
+      - 'package*.json'
+      - '/public/**'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - uses: actions/checkout@v2  
+
+    - name: docker login 
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN:  ${{ secrets.AWS_SESSION_TOKEN }} 
+      run: make login
+
+    - name: build image
+      run: make build
+
+    - name: push image
+      run: make push
+

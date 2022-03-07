@@ -5,9 +5,6 @@ on:
       - master
     paths:
       - 'docker-compose.yml'
-      - 'Makefile'
-      - '.github/workflows/**'
-      - '*dockerfile'
       - 'modules/**'
       - '**.tf'
 jobs:
