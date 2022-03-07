@@ -7,6 +7,7 @@ on:
       - 'docker-compose.yml'
       - 'modules/**'
       - '**.tf'
+      - '.github/workflows/main.yml'
 jobs:
   terraform_plan:
     runs-on: ubuntu-latest
@@ -14,9 +15,9 @@ jobs:
       run:
         shell: bash
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_SESSION_TOKEN:  ${{ secrets.AWS_SESSION_TOKEN }} 
+      CCR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      CCR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      CCR_AWS_SESSION_TOKEN:  ${{ secrets.AWS_SESSION_TOKEN }} 
     steps:
     - uses: actions/checkout@v2
     - name: Terraform_Plan
