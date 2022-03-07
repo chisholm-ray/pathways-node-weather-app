@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "main" {
-  name                 = "ccr-weather-app-repo"
+  name                 = "ccr-weather-app"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
