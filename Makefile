@@ -7,8 +7,6 @@ GETREGION = $(eval AWS_REGION=$(shell aws ec2 describe-availability-zones --outp
 GETURI = $(eval IMAGEFULLNAME=$(shell echo $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/ccr-weather-app:1))
 #IMAGEFULLNAME = $(shell echo $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/ccr-weather-app:1)
 
-.PHONY: set_vars
-set_vars: $(GETREGION)
 
 .PHONY: run_plan
 run_plan: set_vars init plan
@@ -27,15 +25,17 @@ docker_workflow: login build push
 
 .PHONY: set_vars
 set_vars: 
-	$(GETREGION)
-	-$(GETACCOUNTID)
-	-$(GETURI)
+	$(GETREGION) \
+	$(GETACCOUNTID) \
+	$(GETURI)
+
 .PHONY: version
 version:
 	$(COMPOSE_RUN_TERRAFORM) --version
 	
 .PHONY: init
 init:
+	set_vars
 	$(COMPOSE_RUN_TERRAFORM) init -input=false
 	-$(COMPOSE_RUN_TERRAFORM) validate
 	-$(COMPOSE_RUN_TERRAFORM) fmt	
