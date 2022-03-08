@@ -69,5 +69,5 @@ push:
 login:
 		@echo "Logging into ECR with provided credentials"
 # @docker login -u AWS -p $(aws ecr get-login-password --region ap-southeast-2) $(AWS_ACCOUNT_ID).dkr.ecr.ap-southeast-2.amazonaws.com
-		@echo $(ECR_PW) | docker login --username AWS \
+		@printf ${ECR_PW} | docker login -u AWS \
 		--password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com
