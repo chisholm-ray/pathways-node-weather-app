@@ -20,12 +20,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2  
+      env:
+        AWS_ACCESS_KEY_ID:      ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN:      ${{ secrets.AWS_SESSION_TOKEN }}
+        AWS_ACCOUNT_ID:         ${{ secrets.AWS_ACCOUNT_ID }}
+        ECR_PW:                 ${{ secrets.ECR_PW }} 
 
     - name: docker login 
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_SESSION_TOKEN:  ${{ secrets.AWS_SESSION_TOKEN }} 
       run: make login
 
     - name: build image
