@@ -125,3 +125,13 @@ output "public_subnet_b" {
   value = aws_subnet.public["ccr-dojo-public-b"].id
   
 }
+
+output "private_subnet_a" {
+  value = aws_subnet.private["ccr-dojo-private-a"].id
+  
+}
+
+output "private_subnet_b" {
+  value = aws_subnet.private["ccr-dojo-private-b"].id
+  
+}

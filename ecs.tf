@@ -1,5 +1,6 @@
 resource "aws_ecs_cluster" "main" {
   name = "ccr-weather-app-EcsCluster"
+  capacity_providers = [ "FARGATE" ]
 }
 
 resource "aws_ecs_task_definition" "main" {
@@ -12,7 +13,7 @@ resource "aws_ecs_task_definition" "main" {
   task_role_arn            = aws_iam_role.ecs_task_role.arn
   container_definitions = jsonencode([{
 
-    name      = "weather-app-container"
+    name      = "weather-app"
     image     = "${var.image_uri}"
     essential = true
     family    = "weather-app-fam"
@@ -38,13 +39,13 @@ resource "aws_ecs_service" "main" {
 
   network_configuration {
     security_groups  = [module.networks.ecs_sg_id]
-    subnets          = [module.networks.ecs_sg_id]
+    subnets          = [module.networks.private_subnet_a, module.networks.private_subnet_b]
     assign_public_ip = false
   }
 
   load_balancer {
     target_group_arn = module.networks.alb_target_arn
-    container_name   = "weather-app-container"
+    container_name   = "weather-app"
     container_port   = 3000
   }
 

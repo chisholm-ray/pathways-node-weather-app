@@ -7,39 +7,39 @@ resource "aws_ecr_repository" "main" {
   }
 }
 
-resource "aws_ecr_repository_policy" "this" {
-  repository = aws_ecr_repository.main.name
+# resource "aws_ecr_repository_policy" "this" {
+#   repository = aws_ecr_repository.main.name
 
-  policy = <<EOF
-  {
-    "Version": "2008-10-17",
-    "Statement": [
-        {
-            "Sid": "ECS-Policy",
-            "Effect": "Allow",
-            "Principal": "arn:aws:sts::152848913167:assumed-role/AWSReservedSSO_AdministratorAccess_9a5c1e6656f53c81/conor.chisholm-ray@contino.io",
-            "Action": [
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:GetAuthorizationToken",
-                "ecr:BatchGetImage",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:PutImage",
-                "ecr:InitiateLayerUpload",
-                "ecr:UploadLayerPart",
-                "ecr:CompleteLayerUpload",
-                "ecr:DescribeRepositories",
-                "ecr:GetRepositoryPolicy",
-                "ecr:ListImages",
-                "ecr:DeleteRepository",
-                "ecr:BatchDeleteImage",
-                "ecr:SetRepositoryPolicy",
-                "ecr:DeleteRepositoryPolicy"
-            ]
-        }
-    ]
-  }
-  EOF 
-}
+#   policy = <<EOF
+#   {
+#     "Version": "2008-10-17",
+#     "Statement": [
+#         {
+#             "Sid": "ECS-Policy",
+#             "Effect": "Allow",
+#             "Principal": "arn:aws:sts::152848913167:assumed-role/AWSReservedSSO_AdministratorAccess_9a5c1e6656f53c81/conor.chisholm-ray@contino.io",
+#             "Action": [
+#                 "ecr:GetDownloadUrlForLayer",
+#                 "ecr:GetAuthorizationToken",
+#                 "ecr:BatchGetImage",
+#                 "ecr:BatchCheckLayerAvailability",
+#                 "ecr:PutImage",
+#                 "ecr:InitiateLayerUpload",
+#                 "ecr:UploadLayerPart",
+#                 "ecr:CompleteLayerUpload",
+#                 "ecr:DescribeRepositories",
+#                 "ecr:GetRepositoryPolicy",
+#                 "ecr:ListImages",
+#                 "ecr:DeleteRepository",
+#                 "ecr:BatchDeleteImage",
+#                 "ecr:SetRepositoryPolicy",
+#                 "ecr:DeleteRepositoryPolicy"
+#             ]
+#         }
+#     ]
+#   }
+#   EOF 
+# }
 
 resource "aws_ecr_lifecycle_policy" "main" {
   repository = aws_ecr_repository.main.name
