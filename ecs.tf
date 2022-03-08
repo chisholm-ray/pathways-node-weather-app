@@ -6,14 +6,13 @@ resource "aws_ecs_cluster" "main" {
 resource "aws_ecs_task_definition" "main" {
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  family                   = "weather-app-fam"
+  family                   = "ccr-weather-app"
   cpu                      = 256
   memory                   = 512
-  execution_role_arn       = aws_iam_role.ecs_service_role.arn
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  execution_role_arn       = aws_iam_role.ecs_role.arn
   container_definitions = jsonencode([{
 
-    name      = "weather-app"
+    name      = "ccr-weather-app-container"
     image     = "${var.image_uri}"
     essential = true
     family    = "weather-app-fam"
@@ -30,9 +29,7 @@ resource "aws_ecs_service" "main" {
   name                               = "ccr-weather-app-EcsService"
   cluster                            = aws_ecs_cluster.main.id
   task_definition                    = aws_ecs_task_definition.main.arn
-  desired_count                      = 2
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  desired_count                      = 1
   launch_type                        = "FARGATE"
   scheduling_strategy                = "REPLICA"
 
@@ -45,7 +42,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = module.networks.alb_target_arn
-    container_name   = "weather-app"
+    container_name   = "ccr-weather-app-container"
     container_port   = 3000
   }
 
