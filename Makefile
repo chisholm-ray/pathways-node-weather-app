@@ -2,14 +2,15 @@ COMPOSE_RUN_TERRAFORM = docker-compose run --rm tf
 COMPOSE_RUN_BASH = docker-compose run --rm --entrypoint bash tf
 COMPOSE_RUN_AWS = docker-compose run --rm --entrypoint aws tf
 
-GETACCOUNTID = $(eval AWS_ACCOUNT_ID=$(shell aws sts get-caller-identity --output text --query 'Account'))
-GETREGION = $(eval AWS_REGION=$(shell aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]'))
-GETURI = $(eval IMAGEFULLNAME=$(shell echo $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/ccr-weather-app:1))
-#IMAGEFULLNAME = $(shell echo $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/ccr-weather-app:1)
+# GETACCOUNTID = $(shell sh -c "aws sts get-caller-identity --output text --query 'Account'")
+# GETREGION = $(shell sh -c "aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]'")
+
+#GETURI = $(IMAGEFULLNAME=$(GETACCOUNTID).dkr.ecr.ap-southeast-2.amazonaws.com/ccr-weather-app:1)
+IMAGEFULLNAME = $(AWS_ACCOUNT_ID).dkr.ecr.ap-southeast-2.amazonaws.com/ccr-weather-app:1
 
 
 .PHONY: run_plan
-run_plan: set_vars init plan
+run_plan: init plan
 
 .PHONY: run_apply
 run_apply: init apply
@@ -25,9 +26,8 @@ docker_workflow: login build push
 
 .PHONY: set_vars
 set_vars: 
-	$(GETREGION) \
-	$(GETACCOUNTID) \
-	$(GETURI)
+	@eval $(GETURI)
+	$(shell echo $(IMAGEFULLNAME))
 
 .PHONY: version
 version:
@@ -35,14 +35,12 @@ version:
 	
 .PHONY: init
 init:
-	set_vars
 	$(COMPOSE_RUN_TERRAFORM) init -input=false
 	-$(COMPOSE_RUN_TERRAFORM) validate
 	-$(COMPOSE_RUN_TERRAFORM) fmt	
 
 .PHONY: plan
 plan:
-	$() \
 	$(COMPOSE_RUN_TERRAFORM) plan -out=tfplan -input=false -var="image_uri=$(IMAGEFULLNAME)"
 
 .PHONY: apply
