@@ -38,5 +38,5 @@ data "aws_iam_policy_document" "allow_create_log_groups" {
 
 resource "aws_iam_role_policy" "allow_create_log_groups" {
   policy = data.aws_iam_policy_document.allow_create_log_groups.json
-  role   = aws_iam_role.ecs_task_role.id
+  role   = aws_iam_role.ecs_role.id
 }
