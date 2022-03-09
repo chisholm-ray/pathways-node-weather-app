@@ -9,7 +9,7 @@ resource "aws_ecs_task_definition" "main" {
   family                   = "ccr-weather-app"
   cpu                      = 256
   memory                   = 512
-  task_task_role_arn       = aws_iam_role.ecs_role.arn
+  task_role_arn       = aws_iam_role.ecs_role.arn
 
   container_definitions = jsonencode([{
 
