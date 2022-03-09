@@ -1,7 +1,27 @@
 
-# resource "aws_iam_user" "ecs"
+data "aws_iam_policy_document" "ecr_access_policy_document" {
+  statement {
+    actions   = [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:GetAuthorizationToken"
+              ]
+    resources = ["*"]
+  }
+}
 
-// Allow ECS service to interact with LoadBalancers
+resource "aws_iam_policy" "ecr_access_policy"{
+  name = "ecr_access_policy"
+  path = "/"
+  policy = data.aws_iam_policy_document.ecr_access_policy_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecr_attachment" {
+  role        = aws_iam_role.ecs_role.name
+  policy_arn  = aws_iam_policy.ecr_access_policy.arn 
+}
+
 data "aws_iam_policy_document" "ecs_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -19,15 +39,6 @@ resource "aws_iam_role" "ecs_role" {
 }
 
 
-# resource "aws_iam_role" "ecs_task_role" {
-#   assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_role_policy.json
-#   name               = "ccr-EcsClusterDefaultTaskRole"
-# }
-
-resource "aws_iam_role_policy_attachment" "this" {
-  role       = aws_iam_role.ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
 
 data "aws_iam_policy_document" "allow_create_log_groups" {
   statement {
