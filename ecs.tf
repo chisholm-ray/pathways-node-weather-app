@@ -14,7 +14,6 @@ module "ecs" {
   ]
 }
 
-
 resource "aws_ecs_task_definition" "main" {
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
