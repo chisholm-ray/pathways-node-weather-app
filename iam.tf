@@ -1,6 +1,6 @@
 
 resource "aws_iam_policy" "ecr_access_policy" {
-  name     = "ccr_ecr_access_policy"
+  name   = "ccr_ecr_access_policy"
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -21,8 +21,8 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "ecr_attachment" {
-  role        = aws_iam_role.ccr_ecs_role.name
-  policy_arn  = aws_iam_policy.ecr_access_policy.arn
+  role       = aws_iam_role.ccr_ecs_role.name
+  policy_arn = aws_iam_policy.ecr_access_policy.arn
 }
 
 

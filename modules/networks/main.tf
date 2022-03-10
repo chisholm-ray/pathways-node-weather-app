@@ -1,3 +1,8 @@
+locals {
+  private_subs_names = [var.subnet_mappings_priv.subnet_1.name, var.subnet_mappings_priv.subnet_2.name, var.subnet_mappings_priv.subnet_3.name]
+  public_subs_names  = [var.subnet_mappings_pub.subnet_1.name, var.subnet_mappings_pub.subnet_2.name, var.subnet_mappings_pub.subnet_3.name]
+  zipped_subs        = zipmap(local.private_subs_names, local.public_subs_names)
+}
 
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
@@ -39,7 +44,7 @@ resource "aws_subnet" "public" {
 }
 
 resource "aws_eip" "nat" {
-  for_each = { for subnet in var.subnet_mappings_priv : subnet.name => subnet}
+  for_each = { for subnet in var.subnet_mappings_pub : subnet.name => subnet}
   vpc = true
     tags = {
     "Name" = "ccr-${each.value.name}-eip"
@@ -50,8 +55,8 @@ resource "aws_nat_gateway" "private" {
   depends_on = [
     aws_subnet.private
   ]
-  for_each          = { for subnet in var.subnet_mappings_priv : subnet.name => subnet }
-  subnet_id         = aws_subnet.private[each.key].id
+  for_each          = { for subnet in var.subnet_mappings_pub : subnet.name => subnet }
+  subnet_id         = aws_subnet.public[each.key].id
   connectivity_type = "public"
   allocation_id     = aws_eip.nat[each.key].allocation_id
   tags = {
@@ -63,11 +68,6 @@ resource "aws_nat_gateway" "private" {
 resource "aws_route_table" "private" {
   for_each = { for subnet in var.subnet_mappings_priv : subnet.name => subnet }
   vpc_id   = aws_vpc.main.id
-  # route {
-  #   cidr_block = "0.0.0.0/0"
-  #   gateway_id = aws_nat_gateway.private[each.key].id
-  # }
-
   tags = {
     "Name" = "ccr-${each.value.name}-rt"
     "Type" = "Private"
@@ -75,20 +75,43 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route" "private" {
-  for_each = { for subnet in var.subnet_mappings_priv : subnet.name => subnet }
-  route_table_id = aws_route_table.private[each.key].id 
+  depends_on = [
+    aws_nat_gateway.private
+  ]
+  for_each = {"ccr-dojo-private-a" = "ccr-dojo-public-a",
+              "ccr-dojo-private-b" = "ccr-dojo-public-b",
+              "ccr-dojo-private-c" = "ccr-dojo-public-c",
+            
+            }
+  route_table_id = aws_route_table.private[each.key].id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id = aws_nat_gateway.private[each.key].id
+  nat_gateway_id = aws_nat_gateway.private[each.value].id
 }
+
+# resource "aws_route" "private-b" {
+#   depends_on = [
+#     aws_nat_gateway.private
+#   ]
+  
+#   route_table_id = aws_route_table.private["ccr-dojo-private-b"].id
+#   destination_cidr_block = "0.0.0.0/0"
+#   nat_gateway_id = aws_nat_gateway.private["ccr-dojo-public-b"].id
+# }
+
+# resource "aws_route" "private-c" {
+#   depends_on = [
+#     aws_nat_gateway.private
+#   ]
+  
+#   route_table_id = aws_route_table.private["ccr-dojo-private-c"].id
+#   destination_cidr_block = "0.0.0.0/0"
+#   nat_gateway_id = aws_nat_gateway.private["ccr-dojo-public-c"].id
+# }
 
 
 resource "aws_route_table" "public" {
   for_each = { for subnet in var.subnet_mappings_pub : subnet.name => subnet }
   vpc_id = aws_vpc.main.id
-  # route {
-  #     cidr_block = "0.0.0.0/0"
-  #     gateway_id = aws_internet_gateway.public.id
-  # }
     tags = {
     "Name" = "ccr-${each.value.name}-rt"
     "Type" = "Public"
@@ -112,7 +135,6 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private[each.key].id
 }
 
-
 resource "aws_route_table_association" "public" {
     depends_on = [
       aws_route_table.public,
@@ -128,8 +150,6 @@ resource "aws_vpc_endpoint" "s3_endpoint" {
   service_name = "com.amazonaws.ap-southeast-2.s3"
   vpc_endpoint_type = "Gateway"
   route_table_ids = [for i in aws_route_table.private : i.id]
-
-  # security_group_ids = [aws_security_group.s3_endpoint.id]
 }
 
 resource "aws_vpc_endpoint" "ecr_dkr" {
@@ -139,7 +159,6 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
   security_group_ids = [aws_security_group.ecs_tasks.id]
   subnet_ids = [for i in aws_subnet.private : i.id]
   private_dns_enabled = true
-
 }
 
 resource "aws_vpc_endpoint" "ecr_api" {

@@ -1,6 +1,7 @@
 COMPOSE_RUN_TERRAFORM = docker-compose run --rm tf
 COMPOSE_RUN_BASH = docker-compose run --rm --entrypoint bash tf
-COMPOSE_RUN_AWS = docker-compose run --rm --entrypoint aws tf
+COMPOSE_RUN_AWS = docker-compose run --rm --entrypoint awsv2 tf
+
 
 # GETACCOUNTID = $(shell sh -c "aws sts get-caller-identity --output text --query 'Account'")
 # GETREGION = $(shell sh -c "aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]'")
@@ -68,6 +69,9 @@ push:
 .PHONY: login
 login:
 		@echo "Logging into ECR with provided credentials"
-# @docker login -u AWS -p $(aws ecr get-login-password --region ap-southeast-2) $(AWS_ACCOUNT_ID).dkr.ecr.ap-southeast-2.amazonaws.com
-		@printf ${ECR_PW} | docker login -u AWS \
-		--password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com
+#@docker login -u AWS -p $(aws ecr get-login-password --region ap-southeast-2) $(AWS_ACCOUNT_ID).dkr.ecr.ap-southeast-2.amazonaws.com
+		$(COMPOSE_RUN_AWS) ecr get-login-password --region ap-southeast-2 | docker login -u AWS \
+		--password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.ap-southeast-2.amazonaws.com
+
+# @printf ${ECR_PW} | docker login -u AWS \
+# --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com

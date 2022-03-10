@@ -22,7 +22,7 @@ resource "aws_ecs_task_definition" "main" {
   memory                   = 512
   execution_role_arn       = aws_iam_role.ccr_ecs_role.arn
   task_role_arn            = aws_iam_role.ccr_ecs_role.arn
-  container_definitions = <<DEFINITION
+  container_definitions    = <<DEFINITION
   [
     {
     "name": "ccr-weather-app-container",
@@ -42,14 +42,14 @@ resource "aws_ecs_task_definition" "main" {
 
 
 resource "aws_ecs_service" "main" {
-  name                               = "ccr-weather-app-ecsService"
-  cluster                            = module.ecs.ecs_cluster_id
-  task_definition                    = aws_ecs_task_definition.main.arn
-  desired_count                      = 1
-  launch_type                        = "FARGATE"
-  scheduling_strategy                = "REPLICA"
-  force_new_deployment               = true
-#"${aws_ecs_task_definition.main.family}:${max(aws_ecs_task_definition.main.revision, data.aws_ecs_task_definition.main.revision)}"  
+  name                 = "ccr-weather-app-ecsService"
+  cluster              = module.ecs.ecs_cluster_id
+  task_definition      = aws_ecs_task_definition.main.arn
+  desired_count        = 1
+  launch_type          = "FARGATE"
+  scheduling_strategy  = "REPLICA"
+  force_new_deployment = true
+  #"${aws_ecs_task_definition.main.family}:${max(aws_ecs_task_definition.main.revision, data.aws_ecs_task_definition.main.revision)}"  
 
   network_configuration {
     security_groups  = [module.networks.ecs_sg_id, module.networks.alb_sg_id]
