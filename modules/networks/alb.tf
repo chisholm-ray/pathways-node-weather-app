@@ -3,9 +3,8 @@ resource "aws_lb" "main" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
-  subnets            = [aws_subnet.public["ccr-dojo-public-a"].id, aws_subnet.public["ccr-dojo-public-b"].id]
+  subnets            = [aws_subnet.public["ccr-dojo-public-a"].id, aws_subnet.public["ccr-dojo-public-b"].id, aws_subnet.public["ccr-dojo-public-c"].id]
   
-
   enable_deletion_protection = false
 }
  
@@ -15,7 +14,6 @@ resource "aws_alb_target_group" "main" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
-
  
 #   health_check {
 #    healthy_threshold   = "3"
@@ -29,7 +27,7 @@ resource "aws_alb_target_group" "main" {
 }
 
 resource "aws_alb_listener" "http" {
-  load_balancer_arn = aws_lb.main.id
+  load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP"
  

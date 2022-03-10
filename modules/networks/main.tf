@@ -6,10 +6,6 @@ resource "aws_vpc" "main" {
   }
 }
 
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id       = aws_vpc.main.id
-  service_name = "com.amazonaws.ap-southeast-2.s3"
-}
 
 resource "aws_internet_gateway" "public" {
   vpc_id = aws_vpc.main.id
@@ -66,10 +62,10 @@ resource "aws_nat_gateway" "private" {
 resource "aws_route_table" "private" {
   for_each = { for subnet in var.subnet_mappings_priv : subnet.name => subnet }
   vpc_id   = aws_vpc.main.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.private[each.key].id
-  }
+  # route {
+  #   cidr_block = "0.0.0.0/0"
+  #   gateway_id = aws_nat_gateway.private[each.key].id
+  # }
 
   tags = {
     "Name" = "ccr-${each.value.name}-rt"
@@ -77,18 +73,32 @@ resource "aws_route_table" "private" {
   }
 }
 
+resource "aws_route" "private" {
+  for_each = { for subnet in var.subnet_mappings_priv : subnet.name => subnet }
+  route_table_id = aws_route_table.private[each.key].id 
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.private[each.key].id
+}
+
 
 resource "aws_route_table" "public" {
   for_each = { for subnet in var.subnet_mappings_pub : subnet.name => subnet }
   vpc_id = aws_vpc.main.id
-  route {
-      cidr_block = "0.0.0.0/0"
-      gateway_id = aws_internet_gateway.public.id
-  }
+  # route {
+  #     cidr_block = "0.0.0.0/0"
+  #     gateway_id = aws_internet_gateway.public.id
+  # }
     tags = {
     "Name" = "ccr-${each.value.name}-rt"
     "Type" = "Public"
   }  
+}
+
+resource "aws_route" "public" {
+  for_each = { for subnet in var.subnet_mappings_pub : subnet.name => subnet }
+  route_table_id = aws_route_table.public[each.key].id 
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.public.id
 }
 
 resource "aws_route_table_association" "private" {
@@ -112,8 +122,40 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public[each.key].id
 }
 
+resource "aws_vpc_endpoint" "s3_endpoint" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.ap-southeast-2.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids = [for i in aws_route_table.private : i.id]
+
+  # security_group_ids = [aws_security_group.s3_endpoint.id]
+}
+
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.ap-southeast-2.ecr.dkr"
+  vpc_endpoint_type = "Interface"
+  security_group_ids = [aws_security_group.ecs_tasks.id]
+  subnet_ids = [for i in aws_subnet.private : i.id]
+  private_dns_enabled = true
+
+}
+
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.ap-southeast-2.ecr.api"
+  vpc_endpoint_type = "Interface"
+  security_group_ids = [aws_security_group.ecs_tasks.id]
+  subnet_ids = [for i in aws_subnet.private : i.id]
+  private_dns_enabled = true
+}
+
 output "ccr_vpc_id" {
   value = aws_vpc.main.id
+}
+
+output "public_subnets" {
+  value = [aws_subnet.public["ccr-dojo-public-a"].id, aws_subnet.public["ccr-dojo-public-b"].id, aws_subnet.public["ccr-dojo-public-c"].id]
 }
 
 output "public_subnet_a" {
@@ -126,6 +168,16 @@ output "public_subnet_b" {
   
 }
 
+output "public_subnet_c" {
+  value = aws_subnet.public["ccr-dojo-public-c"].id
+  
+}
+
+output "private_subnets" {
+  value = [aws_subnet.private["ccr-dojo-private-a"].id, aws_subnet.private["ccr-dojo-private-b"].id, aws_subnet.private["ccr-dojo-private-c"].id]
+  
+}
+
 output "private_subnet_a" {
   value = aws_subnet.private["ccr-dojo-private-a"].id
   
@@ -133,5 +185,10 @@ output "private_subnet_a" {
 
 output "private_subnet_b" {
   value = aws_subnet.private["ccr-dojo-private-b"].id
+  
+}
+
+output "private_subnet_c" {
+  value = aws_subnet.private["ccr-dojo-private-c"].id
   
 }
