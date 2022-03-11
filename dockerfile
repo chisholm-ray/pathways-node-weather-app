@@ -12,7 +12,8 @@ RUN apk add --update --no-cache \
         google \
         google-api-python-client \
         google-auth \
-        awscliv2
+        awscli
 
 # set default home directory for root.
 ENV HOME /home/terraform
+
